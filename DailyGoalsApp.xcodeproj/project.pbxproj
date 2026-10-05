@@ -24,9 +24,9 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		AB4C894D2DD680020099D5FF /* Tageszielapp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Tageszielapp.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		AB4C895D2DD680040099D5FF /* TageszielappTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TageszielappTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		AB4C89672DD680040099D5FF /* TageszielappUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TageszielappUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		AB4C894D2DD680020099D5FF /* DailyGoalsApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DailyGoalsApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		AB4C895D2DD680040099D5FF /* DailyGoalsAppTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = DailyGoalsAppTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		AB4C89672DD680040099D5FF /* DailyGoalsAppUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = DailyGoalsAppUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -85,9 +85,9 @@
 		AB4C894E2DD680020099D5FF /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				AB4C894D2DD680020099D5FF /* Tageszielapp.app */,
-				AB4C895D2DD680040099D5FF /* TageszielappTests.xctest */,
-				AB4C89672DD680040099D5FF /* TageszielappUITests.xctest */,
+				AB4C894D2DD680020099D5FF /* DailyGoalsApp.app */,
+				AB4C895D2DD680040099D5FF /* DailyGoalsAppTests.xctest */,
+				AB4C89672DD680040099D5FF /* DailyGoalsAppUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -95,9 +95,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		AB4C894C2DD680020099D5FF /* Tageszielapp */ = {
+		AB4C894C2DD680020099D5FF /* DailyGoalsApp */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = AB4C89712DD680040099D5FF /* Build configuration list for PBXNativeTarget "Tageszielapp" */;
+			buildConfigurationList = AB4C89712DD680040099D5FF /* Build configuration list for PBXNativeTarget "DailyGoalsApp" */;
 			buildPhases = (
 				AB4C89492DD680020099D5FF /* Sources */,
 				AB4C894A2DD680020099D5FF /* Frameworks */,
@@ -110,16 +110,16 @@
 			fileSystemSynchronizedGroups = (
 				AB4C894F2DD680020099D5FF /* Tageszielapp */,
 			);
-			name = Tageszielapp;
+			name = DailyGoalsApp;
 			packageProductDependencies = (
 			);
 			productName = Tageszielapp;
-			productReference = AB4C894D2DD680020099D5FF /* Tageszielapp.app */;
+			productReference = AB4C894D2DD680020099D5FF /* DailyGoalsApp.app */;
 			productType = "com.apple.product-type.application";
 		};
-		AB4C895C2DD680040099D5FF /* TageszielappTests */ = {
+		AB4C895C2DD680040099D5FF /* DailyGoalsAppTests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = AB4C89742DD680040099D5FF /* Build configuration list for PBXNativeTarget "TageszielappTests" */;
+			buildConfigurationList = AB4C89742DD680040099D5FF /* Build configuration list for PBXNativeTarget "DailyGoalsAppTests" */;
 			buildPhases = (
 				AB4C89592DD680040099D5FF /* Sources */,
 				AB4C895A2DD680040099D5FF /* Frameworks */,
@@ -133,16 +133,16 @@
 			fileSystemSynchronizedGroups = (
 				AB4C89602DD680040099D5FF /* TageszielappTests */,
 			);
-			name = TageszielappTests;
+			name = DailyGoalsAppTests;
 			packageProductDependencies = (
 			);
 			productName = TageszielappTests;
-			productReference = AB4C895D2DD680040099D5FF /* TageszielappTests.xctest */;
+			productReference = AB4C895D2DD680040099D5FF /* DailyGoalsAppTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
-		AB4C89662DD680040099D5FF /* TageszielappUITests */ = {
+		AB4C89662DD680040099D5FF /* DailyGoalsAppUITests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = AB4C89772DD680040099D5FF /* Build configuration list for PBXNativeTarget "TageszielappUITests" */;
+			buildConfigurationList = AB4C89772DD680040099D5FF /* Build configuration list for PBXNativeTarget "DailyGoalsAppUITests" */;
 			buildPhases = (
 				AB4C89632DD680040099D5FF /* Sources */,
 				AB4C89642DD680040099D5FF /* Frameworks */,
@@ -156,11 +156,11 @@
 			fileSystemSynchronizedGroups = (
 				AB4C896A2DD680040099D5FF /* TageszielappUITests */,
 			);
-			name = TageszielappUITests;
+			name = DailyGoalsAppUITests;
 			packageProductDependencies = (
 			);
 			productName = TageszielappUITests;
-			productReference = AB4C89672DD680040099D5FF /* TageszielappUITests.xctest */;
+			productReference = AB4C89672DD680040099D5FF /* DailyGoalsAppUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
 /* End PBXNativeTarget section */
@@ -186,7 +186,7 @@
 					};
 				};
 			};
-			buildConfigurationList = AB4C89482DD680020099D5FF /* Build configuration list for PBXProject "Tageszielapp" */;
+			buildConfigurationList = AB4C89482DD680020099D5FF /* Build configuration list for PBXProject "DailyGoalsApp" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -200,9 +200,9 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				AB4C894C2DD680020099D5FF /* Tageszielapp */,
-				AB4C895C2DD680040099D5FF /* TageszielappTests */,
-				AB4C89662DD680040099D5FF /* TageszielappUITests */,
+				AB4C894C2DD680020099D5FF /* DailyGoalsApp */,
+				AB4C895C2DD680040099D5FF /* DailyGoalsAppTests */,
+				AB4C89662DD680040099D5FF /* DailyGoalsAppUITests */,
 			);
 		};
 /* End PBXProject section */
@@ -258,12 +258,12 @@
 /* Begin PBXTargetDependency section */
 		AB4C895F2DD680040099D5FF /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = AB4C894C2DD680020099D5FF /* Tageszielapp */;
+			target = AB4C894C2DD680020099D5FF /* DailyGoalsApp */;
 			targetProxy = AB4C895E2DD680040099D5FF /* PBXContainerItemProxy */;
 		};
 		AB4C89692DD680040099D5FF /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = AB4C894C2DD680020099D5FF /* Tageszielapp */;
+			target = AB4C894C2DD680020099D5FF /* DailyGoalsApp */;
 			targetProxy = AB4C89682DD680040099D5FF /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
@@ -458,7 +458,7 @@
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Tageszielapp.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Tageszielapp";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/DailyGoalsApp.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/DailyGoalsApp";
 			};
 			name = Debug;
 		};
@@ -476,7 +476,7 @@
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Tageszielapp.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Tageszielapp";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/DailyGoalsApp.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/DailyGoalsApp";
 			};
 			name = Release;
 		};
@@ -515,7 +515,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		AB4C89482DD680020099D5FF /* Build configuration list for PBXProject "Tageszielapp" */ = {
+		AB4C89482DD680020099D5FF /* Build configuration list for PBXProject "DailyGoalsApp" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				AB4C896F2DD680040099D5FF /* Debug */,
@@ -524,7 +524,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		AB4C89712DD680040099D5FF /* Build configuration list for PBXNativeTarget "Tageszielapp" */ = {
+		AB4C89712DD680040099D5FF /* Build configuration list for PBXNativeTarget "DailyGoalsApp" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				AB4C89722DD680040099D5FF /* Debug */,
@@ -533,7 +533,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		AB4C89742DD680040099D5FF /* Build configuration list for PBXNativeTarget "TageszielappTests" */ = {
+		AB4C89742DD680040099D5FF /* Build configuration list for PBXNativeTarget "DailyGoalsAppTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				AB4C89752DD680040099D5FF /* Debug */,
@@ -542,7 +542,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		AB4C89772DD680040099D5FF /* Build configuration list for PBXNativeTarget "TageszielappUITests" */ = {
+		AB4C89772DD680040099D5FF /* Build configuration list for PBXNativeTarget "DailyGoalsAppUITests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				AB4C89782DD680040099D5FF /* Debug */,
