@@ -6,6 +6,25 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		AB7816472F78311700CC98C1 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AB7816462F78311700CC98C1 /* Assets.xcassets */; };
+		AB7816502F75901000CC98C1 /* DailyGoalsApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB7816432F75901000CC98C1 /* DailyGoalsApp.swift */; };
+		AB7816512F75901000CC98C1 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB78163E2F758FBC00CC98C1 /* ContentView.swift */; };
+		AB7816522F75901000CC98C1 /* GoalsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB7816402F758FC900CC98C1 /* GoalsStore.swift */; };
+		AB7816542F75901000CC98C1 /* AnalyticsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB7816352F758FBC00CC98C1 /* AnalyticsView.swift */; };
+		AB7816552F75901000CC98C1 /* ImportExportView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB7816372F758FBC00CC98C1 /* ImportExportView.swift */; };
+		AB7816562F75901000CC98C1 /* DateSliderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB7816392F758FBC00CC98C1 /* DateSliderView.swift */; };
+		AB7816572F75901000CC98C1 /* GoalRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB78163A2F758FBC00CC98C1 /* GoalRowView.swift */; };
+		AB7816582F75901000CC98C1 /* ProgressCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB78163B2F758FBC00CC98C1 /* ProgressCardView.swift */; };
+		AB7816592F75901000CC98C1 /* TrackerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB78163C2F758FBC00CC98C1 /* TrackerView.swift */; };
+		AB7816AA2F758FC900CC98C1 /* Goal.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB7816AB2F758FC900CC98C1 /* Goal.swift */; };
+		AB7816AC2F758FC900CC98C1 /* AppSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB7816AD2F758FC900CC98C1 /* AppSettings.swift */; };
+		AB7816AE2F758FBC00CC98C1 /* GoalEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB7816AF2F758FBC00CC98C1 /* GoalEditorView.swift */; };
+		AB7816B02F758FBC00CC98C1 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB7816B12F758FBC00CC98C1 /* SettingsView.swift */; };
+		AB7816B22F758FC900CC98C1 /* NotificationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB7816B32F758FC900CC98C1 /* NotificationManager.swift */; };
+		AB7816C22F75901000CC98C1 /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB7816C02F758FBC00CC98C1 /* OnboardingView.swift */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		AB7816192F758F6800CC98C1 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -27,25 +46,23 @@
 		AB78160B2F758F6700CC98C1 /* DailyGoals.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DailyGoals.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		AB7816182F758F6800CC98C1 /* DailyGoalsTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = DailyGoalsTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		AB7816222F758F6800CC98C1 /* DailyGoalsUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = DailyGoalsUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		AB7816352F758FBC00CC98C1 /* AnalyticsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalyticsView.swift; sourceTree = "<group>"; };
+		AB7816C02F758FBC00CC98C1 /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
+		AB7816372F758FBC00CC98C1 /* ImportExportView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImportExportView.swift; sourceTree = "<group>"; };
+		AB7816392F758FBC00CC98C1 /* DateSliderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DateSliderView.swift; sourceTree = "<group>"; };
+		AB78163A2F758FBC00CC98C1 /* GoalRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoalRowView.swift; sourceTree = "<group>"; };
+		AB78163B2F758FBC00CC98C1 /* ProgressCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProgressCardView.swift; sourceTree = "<group>"; };
+		AB78163C2F758FBC00CC98C1 /* TrackerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrackerView.swift; sourceTree = "<group>"; };
+		AB78163E2F758FBC00CC98C1 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		AB7816402F758FC900CC98C1 /* GoalsStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoalsStore.swift; sourceTree = "<group>"; };
+		AB7816432F75901000CC98C1 /* DailyGoalsApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DailyGoalsApp.swift; sourceTree = "<group>"; };
+		AB7816462F78311700CC98C1 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		AB7816AB2F758FC900CC98C1 /* Goal.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Goal.swift; sourceTree = "<group>"; };
+		AB7816AD2F758FC900CC98C1 /* AppSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppSettings.swift; sourceTree = "<group>"; };
+		AB7816AF2F758FBC00CC98C1 /* GoalEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoalEditorView.swift; sourceTree = "<group>"; };
+		AB7816B12F758FBC00CC98C1 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		AB7816B32F758FC900CC98C1 /* NotificationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationManager.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
-
-/* Begin PBXFileSystemSynchronizedRootGroup section */
-		AB78160D2F758F6700CC98C1 /* DailyGoals */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = DailyGoals;
-			sourceTree = "<group>";
-		};
-		AB78161B2F758F6800CC98C1 /* DailyGoalsTests */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = DailyGoalsTests;
-			sourceTree = "<group>";
-		};
-		AB7816252F758F6800CC98C1 /* DailyGoalsUITests */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = DailyGoalsUITests;
-			sourceTree = "<group>";
-		};
-/* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		AB7816082F758F6700CC98C1 /* Frameworks */ = {
@@ -75,10 +92,11 @@
 		AB7816022F758F6700CC98C1 = {
 			isa = PBXGroup;
 			children = (
-				AB78160D2F758F6700CC98C1 /* DailyGoals */,
-				AB78161B2F758F6800CC98C1 /* DailyGoalsTests */,
-				AB7816252F758F6800CC98C1 /* DailyGoalsUITests */,
+				AB7816462F78311700CC98C1 /* Assets.xcassets */,
+				AB78163F2F758FBC00CC98C1 /* Views */,
 				AB78160C2F758F6700CC98C1 /* Products */,
+				AB7816422F758FC900CC98C1 /* Models */,
+				AB7816432F75901000CC98C1 /* DailyGoalsApp.swift */,
 			);
 			sourceTree = "<group>";
 		};
@@ -90,6 +108,66 @@
 				AB7816222F758F6800CC98C1 /* DailyGoalsUITests.xctest */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		AB7816362F758FBC00CC98C1 /* Analytics */ = {
+			isa = PBXGroup;
+			children = (
+				AB7816352F758FBC00CC98C1 /* AnalyticsView.swift */,
+			);
+			path = Analytics;
+			sourceTree = "<group>";
+		};
+		AB7816C12F758FBC00CC98C1 /* Onboarding */ = {
+			isa = PBXGroup;
+			children = (
+				AB7816C02F758FBC00CC98C1 /* OnboardingView.swift */,
+			);
+			path = Onboarding;
+			sourceTree = "<group>";
+		};
+		AB7816382F758FBC00CC98C1 /* Settings */ = {
+			isa = PBXGroup;
+			children = (
+				AB7816372F758FBC00CC98C1 /* ImportExportView.swift */,
+				AB7816AF2F758FBC00CC98C1 /* GoalEditorView.swift */,
+				AB7816B12F758FBC00CC98C1 /* SettingsView.swift */,
+			);
+			path = Settings;
+			sourceTree = "<group>";
+		};
+		AB78163D2F758FBC00CC98C1 /* Tracker */ = {
+			isa = PBXGroup;
+			children = (
+				AB7816392F758FBC00CC98C1 /* DateSliderView.swift */,
+				AB7816402F758FC900CC98C1 /* GoalsStore.swift */,
+				AB78163A2F758FBC00CC98C1 /* GoalRowView.swift */,
+				AB78163B2F758FBC00CC98C1 /* ProgressCardView.swift */,
+				AB78163C2F758FBC00CC98C1 /* TrackerView.swift */,
+			);
+			path = Tracker;
+			sourceTree = "<group>";
+		};
+		AB78163F2F758FBC00CC98C1 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				AB7816362F758FBC00CC98C1 /* Analytics */,
+				AB7816C12F758FBC00CC98C1 /* Onboarding */,
+				AB7816382F758FBC00CC98C1 /* Settings */,
+				AB78163D2F758FBC00CC98C1 /* Tracker */,
+				AB78163E2F758FBC00CC98C1 /* ContentView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		AB7816422F758FC900CC98C1 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				AB7816AB2F758FC900CC98C1 /* Goal.swift */,
+				AB7816AD2F758FC900CC98C1 /* AppSettings.swift */,
+				AB7816B32F758FC900CC98C1 /* NotificationManager.swift */,
+			);
+			path = Models;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -106,9 +184,6 @@
 			buildRules = (
 			);
 			dependencies = (
-			);
-			fileSystemSynchronizedGroups = (
-				AB78160D2F758F6700CC98C1 /* DailyGoals */,
 			);
 			name = DailyGoals;
 			packageProductDependencies = (
@@ -130,9 +205,6 @@
 			dependencies = (
 				AB78161A2F758F6800CC98C1 /* PBXTargetDependency */,
 			);
-			fileSystemSynchronizedGroups = (
-				AB78161B2F758F6800CC98C1 /* DailyGoalsTests */,
-			);
 			name = DailyGoalsTests;
 			packageProductDependencies = (
 			);
@@ -152,9 +224,6 @@
 			);
 			dependencies = (
 				AB7816242F758F6800CC98C1 /* PBXTargetDependency */,
-			);
-			fileSystemSynchronizedGroups = (
-				AB7816252F758F6800CC98C1 /* DailyGoalsUITests */,
 			);
 			name = DailyGoalsUITests;
 			packageProductDependencies = (
@@ -212,6 +281,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AB7816472F78311700CC98C1 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -236,6 +306,21 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AB7816502F75901000CC98C1 /* DailyGoalsApp.swift in Sources */,
+				AB7816512F75901000CC98C1 /* ContentView.swift in Sources */,
+				AB7816522F75901000CC98C1 /* GoalsStore.swift in Sources */,
+				AB7816542F75901000CC98C1 /* AnalyticsView.swift in Sources */,
+				AB7816552F75901000CC98C1 /* ImportExportView.swift in Sources */,
+				AB7816562F75901000CC98C1 /* DateSliderView.swift in Sources */,
+				AB7816572F75901000CC98C1 /* GoalRowView.swift in Sources */,
+				AB7816582F75901000CC98C1 /* ProgressCardView.swift in Sources */,
+				AB7816592F75901000CC98C1 /* TrackerView.swift in Sources */,
+				AB7816AA2F758FC900CC98C1 /* Goal.swift in Sources */,
+				AB7816AC2F758FC900CC98C1 /* AppSettings.swift in Sources */,
+				AB7816AE2F758FBC00CC98C1 /* GoalEditorView.swift in Sources */,
+				AB7816B02F758FBC00CC98C1 /* SettingsView.swift in Sources */,
+				AB7816B22F758FC900CC98C1 /* NotificationManager.swift in Sources */,
+				AB7816C22F75901000CC98C1 /* OnboardingView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -393,8 +478,10 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 5A8ZH88GL2;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -424,8 +511,10 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 5A8ZH88GL2;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
