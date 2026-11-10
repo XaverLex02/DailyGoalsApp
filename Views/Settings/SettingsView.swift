@@ -41,7 +41,7 @@ struct SettingsView: View {
                 }
                 Button("Abbrechen", role: .cancel) {}
             } message: {
-                Text("Alle Einträge werden gelöscht und die ursprünglichen Ziele wiederhergestellt.")
+                Text("Alle Einträge werden gelöscht, die ursprünglichen Ziele wiederhergestellt und Erinnerungen deaktiviert.")
             }
         }
     }
@@ -70,9 +70,9 @@ struct SettingsView: View {
                 .buttonStyle(.plain)
             }
             .onDelete { indexSet in
-                for index in indexSet {
-                    let goal = store.goals[index]
-                    guard store.goals.count > 1 else { return }
+                // Erst Ziele bestimmen, dann löschen – sonst verschieben sich die Indizes
+                let toDelete = indexSet.map { store.goals[$0] }
+                for goal in toDelete {
                     store.removeGoal(goal)
                 }
             }
@@ -88,7 +88,7 @@ struct SettingsView: View {
         } header: {
             Text("Ziele")
         } footer: {
-            Text("Mindestens 1, maximal 5 Ziele.")
+            Text("Mindestens 1, maximal 5 Ziele. Beim Löschen eines Ziels werden auch alle seine Einträge gelöscht.")
         }
     }
 

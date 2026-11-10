@@ -9,6 +9,10 @@ class GoalsStore: ObservableObject {
     @AppStorage("goals") private var goalsData: Data = Data()
 
     private var _historyCache: [String: [String: Bool]]?
+    private var _goalsCache: [Goal]?
+    private var _firstTrackedDayCache: Date??
+    private var _snapshotCache: [AnalyticsRange: AnalyticsSnapshot?] = [:]
+    private var _snapshotCacheDay: Date?
 
     // MARK: - Persistence
 
@@ -21,6 +25,8 @@ class GoalsStore: ObservableObject {
         }
         set {
             _historyCache = newValue
+            _firstTrackedDayCache = nil
+            _snapshotCache = [:]
             objectWillChange.send()
             historyData = (try? JSONEncoder().encode(newValue)) ?? Data()
         }
@@ -28,9 +34,14 @@ class GoalsStore: ObservableObject {
 
     var goals: [Goal] {
         get {
-            (try? JSONDecoder().decode([Goal].self, from: goalsData)) ?? Goal.defaults
+            if let cache = _goalsCache { return cache }
+            let decoded = (try? JSONDecoder().decode([Goal].self, from: goalsData)) ?? Goal.defaults
+            _goalsCache = decoded
+            return decoded
         }
         set {
+            _goalsCache = newValue
+            _snapshotCache = [:]
             objectWillChange.send()
             goalsData = (try? JSONEncoder().encode(newValue)) ?? Data()
         }
@@ -49,22 +60,22 @@ class GoalsStore: ObservableObject {
             goals = Goal.defaults
             return
         }
-        // Alte History-Keys auf neue UUIDs umschreiben
-        var newHistory: [String: [String: Bool]] = [:]
-        for (dateKey, dayEntry) in existingHistory {
-            var newDayEntry: [String: Bool] = [:]
-            for (goalKey, value) in dayEntry {
-                if let uuid = Goal.migrationMap[goalKey] {
-                    newDayEntry[uuid.uuidString] = value
-                } else {
-                    newDayEntry[goalKey] = value
-                }
-            }
-            newHistory[dateKey] = newDayEntry
-        }
+        let newHistory = Self.migrateLegacyKeys(existingHistory)
         _historyCache = newHistory
         historyData = (try? JSONEncoder().encode(newHistory)) ?? Data()
         goals = Goal.defaults
+    }
+
+    /// Schreibt alte `GoalType.rawValue`-Keys (z. B. "lesen") auf die festen UUIDs der Standardziele um.
+    static func migrateLegacyKeys(_ history: [String: [String: Bool]]) -> [String: [String: Bool]] {
+        history.mapValues { dayEntry in
+            var newDayEntry: [String: Bool] = [:]
+            for (goalKey, value) in dayEntry {
+                let key = Goal.migrationMap[goalKey]?.uuidString ?? goalKey
+                newDayEntry[key] = (newDayEntry[key] ?? false) || value
+            }
+            return newDayEntry
+        }
     }
 
     // MARK: - Date Formatting
@@ -134,6 +145,10 @@ class GoalsStore: ObservableObject {
         history = [:]
         goals = Goal.defaults
         settings.colorScheme = "system"
+        settings.notificationsEnabled = false
+        settings.notificationHour = 20
+        settings.notificationMinute = 0
+        NotificationManager.cancel()
     }
 
     // MARK: - Streaks
@@ -166,46 +181,40 @@ class GoalsStore: ObservableObject {
 
     // MARK: - Analytics
 
-    func totalCompletions(for goal: Goal) -> Int {
-        history.values.filter { $0[goal.id.uuidString] == true }.count
+    /// Erster Tag mit History-Eintrag. Tage davor zählen in Quoten nicht als verfehlt.
+    /// Gecacht (wird bei jeder History-Änderung invalidiert), da die Analytics es sehr oft abfragen.
+    /// `yyyy-MM-dd`-Keys sortieren als String chronologisch → nur der kleinste gültige Key wird geparst.
+    var firstTrackedDay: Date? {
+        if let cached = _firstTrackedDayCache { return cached }
+        let first = history.keys.sorted().lazy.compactMap { Self.dateFormatter.date(from: $0) }.first
+        _firstTrackedDayCache = .some(first)
+        return first
     }
 
-    func monthlyRate(for goal: Goal) -> [(month: Date, rate: Double)] {
-        let cal = Calendar.current
-        let today = cal.startOfDay(for: Date())
-
-        var monthKeys = Set<String>()
-        for dateKey in history.keys {
-            guard Self.dateFormatter.date(from: dateKey) != nil else { continue }
-            monthKeys.insert(String(dateKey.prefix(7)))
+    /// Gecachter Analyse-Snapshot für den Zeitraum (neu berechnet nach Änderungen oder Tageswechsel).
+    func analyticsSnapshot(range: AnalyticsRange) -> AnalyticsSnapshot? {
+        let today = Calendar.current.startOfDay(for: Date())
+        if _snapshotCacheDay != today {
+            _snapshotCache = [:]
+            _snapshotCacheDay = today
         }
-
-        return monthKeys.compactMap { monthKey -> (month: Date, rate: Double)? in
-            guard let firstDay = Self.dateFormatter.date(from: "\(monthKey)-01"),
-                  let daysRange = cal.range(of: .day, in: .month, for: firstDay) else { return nil }
-            var compsBase = cal.dateComponents([.year, .month], from: firstDay)
-            var completed = 0, total = 0
-            for day in daysRange {
-                compsBase.day = day
-                guard let dayDate = cal.date(from: compsBase), dayDate <= today else { continue }
-                total += 1
-                let key = Self.dateFormatter.string(from: dayDate)
-                if history[key]?[goal.id.uuidString] == true { completed += 1 }
-            }
-            guard total > 0 else { return nil }
-            return (month: firstDay, rate: Double(completed) / Double(total))
-        }.sorted { $0.month < $1.month }
+        if let cached = _snapshotCache[range] { return cached }
+        let snapshot = computeAnalyticsSnapshot(range: range, today: today)
+        _snapshotCache[range] = .some(snapshot)
+        return snapshot
     }
 
+    /// Monatsquote eines Ziels (für die Monatsmatrix). Zählt Tage ab `firstTrackedDay` bis heute.
     func monthlyRate(for goal: Goal, month: Date) -> Double? {
         let cal = Calendar.current
         let today = cal.startOfDay(for: Date())
-        guard let daysRange = cal.range(of: .day, in: .month, for: month) else { return nil }
+        guard let start = firstTrackedDay,
+              let daysRange = cal.range(of: .day, in: .month, for: month) else { return nil }
         var compsBase = cal.dateComponents([.year, .month], from: month)
         var completed = 0, total = 0
         for day in daysRange {
             compsBase.day = day
-            guard let dayDate = cal.date(from: compsBase), dayDate <= today else { continue }
+            guard let dayDate = cal.date(from: compsBase), dayDate >= start, dayDate <= today else { continue }
             total += 1
             let key = Self.dateFormatter.string(from: dayDate)
             if history[key]?[goal.id.uuidString] == true { completed += 1 }
@@ -214,104 +223,61 @@ class GoalsStore: ObservableObject {
         return Double(completed) / Double(total)
     }
 
-    func averageMonthlyRate(months: [Date]) -> [(month: Date, rate: Double)] {
-        months.compactMap { month -> (month: Date, rate: Double)? in
-            let rates = goals.compactMap { monthlyRate(for: $0, month: month) }
-            guard !rates.isEmpty else { return nil }
-            return (month: month, rate: rates.reduce(0, +) / Double(rates.count))
-        }
-    }
-
-    struct WeekdayPoint: Identifiable {
-        let id = UUID()
-        let weekday: Int
-        let weekdayLabel: String
-        let goal: Goal
-        let average: Double
-    }
-
-    private static let weekdayLabels: [Int: String] = [2: "Mo", 3: "Di", 4: "Mi", 5: "Do", 6: "Fr", 7: "Sa", 1: "So"]
-
-    func weekdayAverages() -> [WeekdayPoint] {
-        let cal = Calendar.current
-        var counts: [Int: [UUID: (sum: Int, total: Int)]] = [:]
-        for (dateKey, dayEntry) in history {
-            guard let date = Self.dateFormatter.date(from: dateKey) else { continue }
-            let wd = cal.component(.weekday, from: date)
-            for goal in goals {
-                let done = dayEntry[goal.id.uuidString] == true ? 1 : 0
-                counts[wd, default: [:]][goal.id, default: (0, 0)].sum += done
-                counts[wd, default: [:]][goal.id, default: (0, 0)].total += 1
-            }
-        }
-        let orderedWeekdays = [2, 3, 4, 5, 6, 7, 1]
-        return orderedWeekdays.flatMap { wd -> [WeekdayPoint] in
-            let label = Self.weekdayLabels[wd] ?? ""
-            return goals.map { goal in
-                let entry = counts[wd]?[goal.id]
-                let avg = entry.map { Double($0.sum) / Double($0.total) } ?? 0
-                return WeekdayPoint(weekday: wd, weekdayLabel: label, goal: goal, average: avg)
-            }
-        }
-    }
-
-    struct GoalPair: Identifiable {
-        let id = UUID()
-        let goal1: Goal
-        let goal2: Goal
-        let count: Int
-    }
-
-    func topPairs(limit: Int = 5) -> [GoalPair] {
-        let currentGoals = goals
-        var pairCounts: [String: (Goal, Goal, Int)] = [:]
-        for i in 0..<currentGoals.count {
-            for j in (i+1)..<currentGoals.count {
-                let key = "\(currentGoals[i].id)+\(currentGoals[j].id)"
-                pairCounts[key] = (currentGoals[i], currentGoals[j], 0)
-            }
-        }
-        for dayEntry in history.values {
-            for i in 0..<currentGoals.count {
-                for j in (i+1)..<currentGoals.count {
-                    guard dayEntry[currentGoals[i].id.uuidString] == true,
-                          dayEntry[currentGoals[j].id.uuidString] == true else { continue }
-                    let key = "\(currentGoals[i].id)+\(currentGoals[j].id)"
-                    pairCounts[key]?.2 += 1
-                }
-            }
-        }
-        return pairCounts.values
-            .sorted { $0.2 > $1.2 }
-            .prefix(limit)
-            .filter { $0.2 > 0 }
-            .map { GoalPair(goal1: $0.0, goal2: $0.1, count: $0.2) }
-    }
-
     // MARK: - Import / Export
 
+    /// Export-Format: Ziele + History. Import akzeptiert zusätzlich das alte Format (nur History).
+    struct Backup: Codable {
+        var goals: [Goal]
+        var history: [String: [String: Bool]]
+    }
+
     func exportJSON() -> String? {
-        guard let data = try? JSONEncoder().encode(history) else { return nil }
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
+        guard let data = try? encoder.encode(Backup(goals: goals, history: history)) else { return nil }
         return String(data: data, encoding: .utf8)
     }
 
     enum ImportError: LocalizedError {
         case invalidString
         case decodingFailed
+        case invalidDate(String)
+        case invalidGoalCount
 
         var errorDescription: String? {
             switch self {
-            case .invalidString:  return "Ungültiger Text in der Zwischenablage."
-            case .decodingFailed: return "JSON konnte nicht dekodiert werden."
+            case .invalidString:         return "Ungültiger Text in der Zwischenablage."
+            case .decodingFailed:        return "JSON konnte nicht dekodiert werden."
+            case .invalidDate(let key):  return "Ungültiges Datum „\(key)“ (erwartet: yyyy-MM-dd)."
+            case .invalidGoalCount:      return "Die Datei muss 1 bis 5 Ziele enthalten."
             }
         }
     }
 
     func importJSON(_ string: String) throws {
         guard let data = string.data(using: .utf8) else { throw ImportError.invalidString }
-        guard let decoded = try? JSONDecoder().decode([String: [String: Bool]].self, from: data) else {
+        let decoder = JSONDecoder()
+
+        let importedGoals: [Goal]?
+        let rawHistory: [String: [String: Bool]]
+        if let backup = try? decoder.decode(Backup.self, from: data) {
+            importedGoals = backup.goals
+            rawHistory = backup.history
+        } else if let legacy = try? decoder.decode([String: [String: Bool]].self, from: data) {
+            importedGoals = nil
+            rawHistory = legacy
+        } else {
             throw ImportError.decodingFailed
         }
-        history = decoded
+
+        for key in rawHistory.keys where Self.dateFormatter.date(from: key) == nil {
+            throw ImportError.invalidDate(key)
+        }
+        if let importedGoals, !(1...5).contains(importedGoals.count) {
+            throw ImportError.invalidGoalCount
+        }
+
+        if let importedGoals { goals = importedGoals }
+        history = Self.migrateLegacyKeys(rawHistory)
     }
 }

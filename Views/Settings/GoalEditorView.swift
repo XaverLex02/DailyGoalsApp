@@ -112,10 +112,11 @@ struct GoalEditorView: View {
                     Button("Speichern") {
                         let hexColor = UIColor(color).toHex() ?? "#3B82F6"
                         let desc = description.trimmingCharacters(in: .whitespacesAndNewlines)
-                        onSave(Goal(id: goalId, name: name, colorHex: hexColor, symbol: symbol, description: desc.isEmpty ? nil : desc))
+                        let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
+                        onSave(Goal(id: goalId, name: trimmedName, colorHex: hexColor, symbol: symbol, description: desc.isEmpty ? nil : desc))
                         dismiss()
                     }
-                    .disabled(name.trimmingCharacters(in: .whitespaces).isEmpty)
+                    .disabled(name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
                 }
             }
         }
@@ -126,7 +127,9 @@ private extension UIColor {
     func toHex() -> String? {
         var r: CGFloat = 0, g: CGFloat = 0, b: CGFloat = 0, a: CGFloat = 0
         guard getRed(&r, green: &g, blue: &b, alpha: &a) else { return nil }
-        return String(format: "#%02X%02X%02X", Int(r * 255), Int(g * 255), Int(b * 255))
+        // Display-P3/Extended-sRGB liefert Werte außerhalb 0…1 → sonst ungültiger Hex-String
+        func byte(_ v: CGFloat) -> Int { Int((min(max(v, 0), 1) * 255).rounded()) }
+        return String(format: "#%02X%02X%02X", byte(r), byte(g), byte(b))
     }
 }
 

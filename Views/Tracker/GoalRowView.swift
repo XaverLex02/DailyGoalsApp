@@ -32,17 +32,11 @@ struct GoalRowView: View {
         .buttonStyle(.plain)
     }
 
-    @ViewBuilder
     private var toggleIcon: some View {
-        let image = Image(systemName: isCompleted ? "checkmark.circle.fill" : "circle")
+        Image(systemName: isCompleted ? "checkmark.circle.fill" : "circle")
             .font(.title2)
             .foregroundStyle(isCompleted ? goal.color : Color.secondary)
-
-        if #available(iOS 17, *) {
-            image.contentTransition(.symbolEffect(.replace))
-        } else {
-            image.animation(.easeInOut(duration: 0.2), value: isCompleted)
-        }
+            .contentTransition(.symbolEffect(.replace))
     }
 }
 

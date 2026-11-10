@@ -6,8 +6,25 @@ class AppSettings {
 
     // MARK: - Onboarding
 
-    var hasLaunchedBefore: Bool = UserDefaults.standard.bool(forKey: "hasLaunchedBefore") {
+    var hasLaunchedBefore: Bool = AppSettings.initialHasLaunchedBefore() {
         didSet { UserDefaults.standard.set(hasLaunchedBefore, forKey: "hasLaunchedBefore") }
+    }
+
+    /// Bestandsnutzer (History vorhanden, aber Version vor dem Onboarding) sollen das Onboarding
+    /// nicht sehen – es würde ihre Ziele durch neue ersetzen und die History verwaisen lassen.
+    private static func initialHasLaunchedBefore() -> Bool {
+        let ud = UserDefaults.standard
+        if ud.object(forKey: "hasLaunchedBefore") != nil {
+            return ud.bool(forKey: "hasLaunchedBefore")
+        }
+        let hasHistory: Bool = {
+            guard let data = ud.data(forKey: "goalsHistory"),
+                  let history = try? JSONDecoder().decode([String: [String: Bool]].self, from: data)
+            else { return false }
+            return !history.isEmpty
+        }()
+        if hasHistory { ud.set(true, forKey: "hasLaunchedBefore") }
+        return hasHistory
     }
 
     // MARK: - Theme
