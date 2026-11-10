@@ -12,7 +12,6 @@
 		AB7816512F75901000CC98C1 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB78163E2F758FBC00CC98C1 /* ContentView.swift */; };
 		AB7816522F75901000CC98C1 /* GoalsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB7816402F758FC900CC98C1 /* GoalsStore.swift */; };
 		AB7816542F75901000CC98C1 /* AnalyticsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB7816352F758FBC00CC98C1 /* AnalyticsView.swift */; };
-		AB7816552F75901000CC98C1 /* ImportExportView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB7816372F758FBC00CC98C1 /* ImportExportView.swift */; };
 		AB7816562F75901000CC98C1 /* DateSliderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB7816392F758FBC00CC98C1 /* DateSliderView.swift */; };
 		AB7816572F75901000CC98C1 /* GoalRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB78163A2F758FBC00CC98C1 /* GoalRowView.swift */; };
 		AB7816582F75901000CC98C1 /* ProgressCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB78163B2F758FBC00CC98C1 /* ProgressCardView.swift */; };
@@ -22,6 +21,7 @@
 		AB7816AE2F758FBC00CC98C1 /* GoalEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB7816AF2F758FBC00CC98C1 /* GoalEditorView.swift */; };
 		AB7816B02F758FBC00CC98C1 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB7816B12F758FBC00CC98C1 /* SettingsView.swift */; };
 		AB7816B22F758FC900CC98C1 /* NotificationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB7816B32F758FC900CC98C1 /* NotificationManager.swift */; };
+		AB7816D02F758FC900CC98C1 /* AnalyticsSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB7816D12F758FC900CC98C1 /* AnalyticsSnapshot.swift */; };
 		AB7816C22F75901000CC98C1 /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB7816C02F758FBC00CC98C1 /* OnboardingView.swift */; };
 /* End PBXBuildFile section */
 
@@ -47,8 +47,6 @@
 		AB7816182F758F6800CC98C1 /* DailyGoalsTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = DailyGoalsTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		AB7816222F758F6800CC98C1 /* DailyGoalsUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = DailyGoalsUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		AB7816352F758FBC00CC98C1 /* AnalyticsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalyticsView.swift; sourceTree = "<group>"; };
-		AB7816C02F758FBC00CC98C1 /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
-		AB7816372F758FBC00CC98C1 /* ImportExportView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImportExportView.swift; sourceTree = "<group>"; };
 		AB7816392F758FBC00CC98C1 /* DateSliderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DateSliderView.swift; sourceTree = "<group>"; };
 		AB78163A2F758FBC00CC98C1 /* GoalRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoalRowView.swift; sourceTree = "<group>"; };
 		AB78163B2F758FBC00CC98C1 /* ProgressCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProgressCardView.swift; sourceTree = "<group>"; };
@@ -62,6 +60,8 @@
 		AB7816AF2F758FBC00CC98C1 /* GoalEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoalEditorView.swift; sourceTree = "<group>"; };
 		AB7816B12F758FBC00CC98C1 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		AB7816B32F758FC900CC98C1 /* NotificationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationManager.swift; sourceTree = "<group>"; };
+		AB7816D12F758FC900CC98C1 /* AnalyticsSnapshot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalyticsSnapshot.swift; sourceTree = "<group>"; };
+		AB7816C02F758FBC00CC98C1 /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -118,18 +118,9 @@
 			path = Analytics;
 			sourceTree = "<group>";
 		};
-		AB7816C12F758FBC00CC98C1 /* Onboarding */ = {
-			isa = PBXGroup;
-			children = (
-				AB7816C02F758FBC00CC98C1 /* OnboardingView.swift */,
-			);
-			path = Onboarding;
-			sourceTree = "<group>";
-		};
 		AB7816382F758FBC00CC98C1 /* Settings */ = {
 			isa = PBXGroup;
 			children = (
-				AB7816372F758FBC00CC98C1 /* ImportExportView.swift */,
 				AB7816AF2F758FBC00CC98C1 /* GoalEditorView.swift */,
 				AB7816B12F758FBC00CC98C1 /* SettingsView.swift */,
 			);
@@ -166,8 +157,17 @@
 				AB7816AB2F758FC900CC98C1 /* Goal.swift */,
 				AB7816AD2F758FC900CC98C1 /* AppSettings.swift */,
 				AB7816B32F758FC900CC98C1 /* NotificationManager.swift */,
+				AB7816D12F758FC900CC98C1 /* AnalyticsSnapshot.swift */,
 			);
 			path = Models;
+			sourceTree = "<group>";
+		};
+		AB7816C12F758FBC00CC98C1 /* Onboarding */ = {
+			isa = PBXGroup;
+			children = (
+				AB7816C02F758FBC00CC98C1 /* OnboardingView.swift */,
+			);
+			path = Onboarding;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -240,7 +240,7 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 2630;
-				LastUpgradeCheck = 2630;
+				LastUpgradeCheck = 2720;
 				TargetAttributes = {
 					AB78160A2F758F6700CC98C1 = {
 						CreatedOnToolsVersion = 26.3;
@@ -310,7 +310,6 @@
 				AB7816512F75901000CC98C1 /* ContentView.swift in Sources */,
 				AB7816522F75901000CC98C1 /* GoalsStore.swift in Sources */,
 				AB7816542F75901000CC98C1 /* AnalyticsView.swift in Sources */,
-				AB7816552F75901000CC98C1 /* ImportExportView.swift in Sources */,
 				AB7816562F75901000CC98C1 /* DateSliderView.swift in Sources */,
 				AB7816572F75901000CC98C1 /* GoalRowView.swift in Sources */,
 				AB7816582F75901000CC98C1 /* ProgressCardView.swift in Sources */,
@@ -320,6 +319,7 @@
 				AB7816AE2F758FBC00CC98C1 /* GoalEditorView.swift in Sources */,
 				AB7816B02F758FBC00CC98C1 /* SettingsView.swift in Sources */,
 				AB7816B22F758FC900CC98C1 /* NotificationManager.swift in Sources */,
+				AB7816D02F758FC900CC98C1 /* AnalyticsSnapshot.swift in Sources */,
 				AB7816C22F75901000CC98C1 /* OnboardingView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -412,6 +412,7 @@
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
@@ -468,6 +469,7 @@
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				VALIDATE_PRODUCT = YES;
 			};

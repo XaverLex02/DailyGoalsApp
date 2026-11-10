@@ -2,6 +2,7 @@ import SwiftUI
 
 struct TrackerView: View {
     @EnvironmentObject private var store: GoalsStore
+    @State private var today: Date = Calendar.current.startOfDay(for: Date())
     @State private var selectedDate: Date = Calendar.current.startOfDay(for: Date())
 
     var body: some View {
@@ -17,7 +18,7 @@ struct TrackerView: View {
                     .padding(.horizontal)
 
                     // Date Slider
-                    DateSliderView(selectedDate: $selectedDate)
+                    DateSliderView(selectedDate: $selectedDate, today: today)
 
                     // Goal Rows
                     VStack(spacing: 10) {
@@ -44,7 +45,25 @@ struct TrackerView: View {
                     streakBadge
                 }
             }
+            .onReceive(NotificationCenter.default.publisher(for: .NSCalendarDayChanged)) { _ in
+                // Kommt nicht zwingend auf dem Main Thread an
+                Task { @MainActor in refreshToday() }
+            }
+            .onReceive(NotificationCenter.default.publisher(for: UIApplication.willEnterForegroundNotification)) { _ in
+                refreshToday()
+            }
         }
+    }
+
+    /// Bei Tageswechsel (App offen oder aus dem Hintergrund) auf den neuen Tag wechseln,
+    /// sofern bisher „heute“ ausgewählt war.
+    private func refreshToday() {
+        let newToday = Calendar.current.startOfDay(for: Date())
+        guard newToday != today else { return }
+        if Calendar.current.isDate(selectedDate, inSameDayAs: today) {
+            selectedDate = newToday
+        }
+        today = newToday
     }
 
     @ViewBuilder

@@ -2,10 +2,10 @@ import SwiftUI
 
 struct DateSliderView: View {
     @Binding var selectedDate: Date
+    var today: Date = Calendar.current.startOfDay(for: Date())
 
     private var dates: [Date] {
-        let today = Calendar.current.startOfDay(for: Date())
-        return (0..<31).compactMap {
+        (0..<31).compactMap {
             Calendar.current.date(byAdding: .day, value: -30 + $0, to: today)
         }
     }
@@ -28,11 +28,15 @@ struct DateSliderView: View {
                 .padding(.vertical, 8)
             }
             .onAppear {
-                let today = Calendar.current.startOfDay(for: Date())
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
                     withAnimation {
                         proxy.scrollTo(today, anchor: .center)
                     }
+                }
+            }
+            .onChange(of: today) { _, newToday in
+                withAnimation {
+                    proxy.scrollTo(newToday, anchor: .center)
                 }
             }
         }

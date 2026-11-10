@@ -3,8 +3,6 @@ import SwiftUI
 struct OnboardingView: View {
     @Environment(AppSettings.self) private var settings
     @EnvironmentObject private var store: GoalsStore
-    @Environment(\.dismiss) private var dismiss
-
     @State private var step = 0
 
     var body: some View {
@@ -21,7 +19,9 @@ struct OnboardingView: View {
                 case 2:
                     NotificationsStep(onNext: nextStep)
                 default:
-                    FinishStep(onFinish: { dismiss() })
+                    // Erst hier als erledigt markieren: Das Setzen schließt den fullScreenCover.
+                    // Würde es früher passieren (z. B. onAppear), verschwände das Onboarding sofort.
+                    FinishStep(onFinish: { settings.hasLaunchedBefore = true })
                 }
             }
             .id(step)
@@ -31,9 +31,6 @@ struct OnboardingView: View {
             ))
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .animation(.spring(response: 0.4, dampingFraction: 0.75), value: step)
-        }
-        .onAppear {
-            settings.hasLaunchedBefore = true
         }
     }
 
@@ -311,8 +308,15 @@ private struct NotificationsStep: View {
             .padding(.horizontal, 24)
             .padding(.bottom, 40)
         }
+        .onChange(of: settings.notificationDate) { _, _ in
+            guard settings.notificationsEnabled else { return }
+            NotificationManager.schedule(hour: settings.notificationHour, minute: settings.notificationMinute)
+        }
         .onChange(of: settings.notificationsEnabled) { _, enabled in
-            guard enabled else { return }
+            guard enabled else {
+                NotificationManager.cancel()
+                return
+            }
             Task {
                 let granted = await NotificationManager.requestPermission()
                 if granted {
