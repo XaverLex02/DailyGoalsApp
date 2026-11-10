@@ -242,6 +242,7 @@ private struct GoalsStep: View {
 
 private struct NotificationsStep: View {
     @Environment(AppSettings.self) private var settings
+    @EnvironmentObject private var store: GoalsStore
     let onNext: () -> Void
 
     var body: some View {
@@ -309,21 +310,17 @@ private struct NotificationsStep: View {
             .padding(.bottom, 40)
         }
         .onChange(of: settings.notificationDate) { _, _ in
-            guard settings.notificationsEnabled else { return }
-            NotificationManager.schedule(hour: settings.notificationHour, minute: settings.notificationMinute)
+            store.rescheduleReminders(settings: settings)
         }
         .onChange(of: settings.notificationsEnabled) { _, enabled in
             guard enabled else {
-                NotificationManager.cancel()
+                store.rescheduleReminders(settings: settings)
                 return
             }
             Task {
                 let granted = await NotificationManager.requestPermission()
                 if granted {
-                    NotificationManager.schedule(
-                        hour: settings.notificationHour,
-                        minute: settings.notificationMinute
-                    )
+                    store.rescheduleReminders(settings: settings)
                 } else {
                     settings.notificationsEnabled = false
                 }

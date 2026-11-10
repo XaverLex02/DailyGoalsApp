@@ -268,16 +268,12 @@ private struct StreakBar: View {
 private struct TrendChart: View {
     let snapshot: AnalyticsSnapshot
 
-    private struct Point: Identifiable {
-        let goal: Goal
-        let start: Date
-        let rate: Double
-        var id: String { "\(goal.id)-\(start.timeIntervalSince1970)" }
-    }
-
-    private var points: [Point] {
-        snapshot.buckets.flatMap { bucket in
-            snapshot.goals.map { Point(goal: $0, start: bucket.start, rate: bucket.goalRates[$0.id] ?? 0) }
+    /// Serien über die Ziel-ID (nicht den Namen), damit gleich benannte Ziele getrennt bleiben
+    private var points: [SeriesPoint] {
+        snapshot.goals.flatMap { goal in
+            SeriesPoint.make(buckets: snapshot.buckets, base: goal.id.uuidString, color: goal.color) {
+                $0.goalRates[goal.id] ?? 0
+            }
         }
     }
 
@@ -335,18 +331,22 @@ private struct TrendChart: View {
             Chart(points) { point in
                 LineMark(
                     x: .value("Zeit", point.start),
-                    y: .value("Quote", point.rate)
+                    y: .value("Quote", point.rate),
+                    series: .value("Serie", point.seriesKey)
                 )
-                .foregroundStyle(by: .value("Ziel", point.goal.name))
-                .symbol(by: .value("Ziel", point.goal.name))
-                .symbolSize(snapshot.buckets.count <= 15 ? 30 : 0)
+                .foregroundStyle(point.color.opacity(point.isRunningSegment ? 0.5 : 1))
+                .lineStyle(point.strokeStyle)
                 .interpolationMethod(.monotone)
+
+                if snapshot.buckets.count <= 15 && !point.isAnchor {
+                    PointMark(
+                        x: .value("Zeit", point.start),
+                        y: .value("Quote", point.rate)
+                    )
+                    .foregroundStyle(point.color.opacity(point.isRunningPoint ? 0.4 : 1))
+                    .symbolSize(30)
+                }
             }
-            .chartForegroundStyleScale(
-                domain: snapshot.goals.map(\.name),
-                range: snapshot.goals.map(\.color)
-            )
-            .chartLegend(.hidden)
             .chartXAxis {
                 AxisMarks(values: AnalyticsFormat.ticks(snapshot.buckets)) { value in
                     AxisGridLine()
@@ -367,6 +367,8 @@ private struct TrendChart: View {
             .frame(height: 220)
             .card()
 
+            RunningBucketNote(snapshot: snapshot)
+
             FlowLayout(spacing: 8) {
                 ForEach(snapshot.goals) { goal in
                     HStack(spacing: 6) {
@@ -383,6 +385,65 @@ private struct TrendChart: View {
     }
 }
 
+// MARK: - Serien mit laufendem Abschnitt
+
+/// Punkt einer Chart-Linie. Der laufende (unvollständige) Abschnitt bekommt eine eigene, gestrichelte
+/// Serie, die am letzten abgeschlossenen Punkt (`isAnchor`) ansetzt.
+private struct SeriesPoint: Identifiable {
+    let seriesKey: String
+    let color: Color
+    let start: Date
+    let rate: Double
+    let isRunningSegment: Bool
+    let isRunningPoint: Bool
+    let isAnchor: Bool
+    var id: String { "\(seriesKey)-\(start.timeIntervalSince1970)" }
+
+    var strokeStyle: StrokeStyle {
+        StrokeStyle(lineWidth: 2, lineCap: .round, dash: isRunningSegment ? [4, 4] : [])
+    }
+
+    static func make(
+        buckets: [AnalyticsSnapshot.Bucket],
+        base: String,
+        color: Color,
+        value: (AnalyticsSnapshot.Bucket) -> Double
+    ) -> [SeriesPoint] {
+        var result = buckets.filter { !$0.isRunning }.map {
+            SeriesPoint(seriesKey: "\(base)-main", color: color, start: $0.start, rate: value($0),
+                        isRunningSegment: false, isRunningPoint: false, isAnchor: false)
+        }
+        if let running = buckets.last, running.isRunning {
+            if let anchor = buckets.dropLast().last {
+                result.append(SeriesPoint(seriesKey: "\(base)-run", color: color, start: anchor.start, rate: value(anchor),
+                                          isRunningSegment: true, isRunningPoint: false, isAnchor: true))
+            }
+            result.append(SeriesPoint(seriesKey: "\(base)-run", color: color, start: running.start, rate: value(running),
+                                      isRunningSegment: true, isRunningPoint: true, isAnchor: false))
+        }
+        return result
+    }
+}
+
+/// Hinweis unter den Charts, wenn der letzte Abschnitt noch läuft
+private struct RunningBucketNote: View {
+    let snapshot: AnalyticsSnapshot
+
+    var body: some View {
+        if let last = snapshot.buckets.last, last.isRunning {
+            let name: String = switch snapshot.granularity {
+            case .day:     "laufender Tag"
+            case .week:    "laufende Woche"
+            case .month:   "laufender Monat"
+            case .quarter: "laufendes Quartal"
+            }
+            Label("Gestrichelt: \(name), bisher \(last.days) von \(last.fullDays) Tagen", systemImage: "info.circle")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+        }
+    }
+}
+
 // MARK: - Gesamtfortschritt
 
 private struct OverallChart: View {
@@ -393,21 +454,34 @@ private struct OverallChart: View {
             Text("Gesamtfortschritt")
                 .font(.headline)
 
-            Chart(snapshot.buckets) { bucket in
-                AreaMark(
-                    x: .value("Zeit", bucket.start),
-                    y: .value("Quote", bucket.overallRate)
-                )
-                .interpolationMethod(.monotone)
-                .foregroundStyle(Color.accentColor.opacity(0.15))
-                LineMark(
-                    x: .value("Zeit", bucket.start),
-                    y: .value("Quote", bucket.overallRate)
-                )
-                .interpolationMethod(.monotone)
-                .foregroundStyle(Color.accentColor)
-                .symbol(.circle)
-                .symbolSize(snapshot.buckets.count <= 15 ? 30 : 0)
+            Chart {
+                ForEach(snapshot.buckets) { bucket in
+                    AreaMark(
+                        x: .value("Zeit", bucket.start),
+                        y: .value("Quote", bucket.overallRate)
+                    )
+                    .interpolationMethod(.monotone)
+                    .foregroundStyle(Color.accentColor.opacity(0.15))
+                }
+                ForEach(points) { point in
+                    LineMark(
+                        x: .value("Zeit", point.start),
+                        y: .value("Quote", point.rate),
+                        series: .value("Serie", point.seriesKey)
+                    )
+                    .interpolationMethod(.monotone)
+                    .foregroundStyle(point.color.opacity(point.isRunningSegment ? 0.5 : 1))
+                    .lineStyle(point.strokeStyle)
+
+                    if snapshot.buckets.count <= 15 && !point.isAnchor {
+                        PointMark(
+                            x: .value("Zeit", point.start),
+                            y: .value("Quote", point.rate)
+                        )
+                        .foregroundStyle(point.color.opacity(point.isRunningPoint ? 0.4 : 1))
+                        .symbolSize(30)
+                    }
+                }
             }
             .chartXAxis {
                 AxisMarks(values: AnalyticsFormat.ticks(snapshot.buckets)) { value in
@@ -428,7 +502,13 @@ private struct OverallChart: View {
             .chartYScale(domain: 0...1)
             .frame(height: 160)
             .card()
+
+            RunningBucketNote(snapshot: snapshot)
         }
+    }
+
+    private var points: [SeriesPoint] {
+        SeriesPoint.make(buckets: snapshot.buckets, base: "overall", color: .accentColor) { $0.overallRate }
     }
 }
 
@@ -448,10 +528,11 @@ private struct WeekdayChart: View {
                     x: .value("Tag", point.weekdayLabel),
                     y: .value("Ø erledigte Ziele", point.average)
                 )
-                .foregroundStyle(by: .value("Ziel", point.goal.name))
+                .foregroundStyle(by: .value("Ziel", point.goal.id.uuidString))
             }
+            // Zuordnung über die ID, damit gleich benannte Ziele eigene Farben behalten
             .chartForegroundStyleScale(
-                domain: snapshot.goals.map(\.name),
+                domain: snapshot.goals.map(\.id.uuidString),
                 range: snapshot.goals.map(\.color)
             )
             .chartLegend(.hidden)

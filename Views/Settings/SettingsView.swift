@@ -20,6 +20,11 @@ struct SettingsView: View {
             }
             .navigationTitle("Einstellungen")
             .navigationBarTitleDisplayMode(.large)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    EditButton()
+                }
+            }
             .sheet(item: $editingGoal) { goal in
                 GoalEditorView(goal: goal) { updated in
                     store.updateGoal(updated)
@@ -68,6 +73,11 @@ struct SettingsView: View {
                     }
                 }
                 .buttonStyle(.plain)
+                // Mindestens ein Ziel muss bleiben → beim letzten gar nicht erst „Löschen“ anbieten
+                .deleteDisabled(store.goals.count <= 1)
+            }
+            .onMove { source, destination in
+                store.moveGoals(from: source, to: destination)
             }
             .onDelete { indexSet in
                 // Erst Ziele bestimmen, dann löschen – sonst verschieben sich die Indizes
@@ -88,7 +98,7 @@ struct SettingsView: View {
         } header: {
             Text("Ziele")
         } footer: {
-            Text("Mindestens 1, maximal 5 Ziele. Beim Löschen eines Ziels werden auch alle seine Einträge gelöscht.")
+            Text("Mindestens 1, maximal 5 Ziele. Über „Bearbeiten“ lässt sich die Reihenfolge ändern. Beim Löschen eines Ziels werden auch alle seine Einträge gelöscht.")
         }
     }
 
@@ -115,27 +125,21 @@ struct SettingsView: View {
                         Task {
                             let granted = await NotificationManager.requestPermission()
                             if granted {
-                                NotificationManager.schedule(
-                                    hour: settings.wrappedValue.notificationHour,
-                                    minute: settings.wrappedValue.notificationMinute
-                                )
+                                store.rescheduleReminders(settings: settings.wrappedValue)
                             } else {
                                 settings.wrappedValue.notificationsEnabled = false
                                 showPermissionDeniedAlert = true
                             }
                         }
                     } else {
-                        NotificationManager.cancel()
+                        store.rescheduleReminders(settings: settings.wrappedValue)
                     }
                 }
 
             if settings.wrappedValue.notificationsEnabled {
                 DatePicker("Uhrzeit", selection: settings.notificationDate, displayedComponents: .hourAndMinute)
                     .onChange(of: settings.wrappedValue.notificationDate) { _, _ in
-                        NotificationManager.schedule(
-                            hour: settings.wrappedValue.notificationHour,
-                            minute: settings.wrappedValue.notificationMinute
-                        )
+                        store.rescheduleReminders(settings: settings.wrappedValue)
                     }
             }
         }

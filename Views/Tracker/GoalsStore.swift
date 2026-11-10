@@ -110,9 +110,15 @@ class GoalsStore: ObservableObject {
     func toggle(_ goal: Goal, for date: Date) {
         let key = Self.key(for: date)
         var dayEntry = history[key] ?? [:]
-        dayEntry[goal.id.uuidString] = !(dayEntry[goal.id.uuidString] ?? false)
+        // Nur erledigte Ziele speichern: Abhaken entfernt den Eintrag, leere Tage verschwinden ganz.
+        // Sonst würde ein kurz an- und wieder abgehakter Tag als „erster erfasster Tag“ zählen.
+        if dayEntry[goal.id.uuidString] == true {
+            dayEntry.removeValue(forKey: goal.id.uuidString)
+        } else {
+            dayEntry[goal.id.uuidString] = true
+        }
         var updated = history
-        updated[key] = dayEntry
+        updated[key] = dayEntry.isEmpty ? nil : dayEntry
         history = updated
         UIImpactFeedbackGenerator(style: .medium).impactOccurred()
     }
@@ -131,9 +137,15 @@ class GoalsStore: ObservableObject {
         for (dateKey, dayEntry) in updated {
             var newEntry = dayEntry
             newEntry.removeValue(forKey: goal.id.uuidString)
-            updated[dateKey] = newEntry
+            updated[dateKey] = newEntry.isEmpty ? nil : newEntry
         }
         history = updated
+    }
+
+    func moveGoals(from source: IndexSet, to destination: Int) {
+        var reordered = goals
+        reordered.move(fromOffsets: source, toOffset: destination)
+        goals = reordered
     }
 
     func updateGoal(_ goal: Goal) {
@@ -179,14 +191,36 @@ class GoalsStore: ObservableObject {
         return count
     }
 
+    // MARK: - Erinnerungen
+
+    /// Plant die Erinnerungen passend zu Einstellungen und heutigem Stand neu (oder storniert sie).
+    func rescheduleReminders(settings: AppSettings) {
+        guard settings.notificationsEnabled else {
+            NotificationManager.cancel()
+            return
+        }
+        let today = Calendar.current.startOfDay(for: Date())
+        NotificationManager.schedule(
+            hour: settings.notificationHour,
+            minute: settings.notificationMinute,
+            openGoalsToday: goals.filter { !isCompleted($0, for: today) }.map(\.name),
+            allGoals: goals.map(\.name)
+        )
+    }
+
     // MARK: - Analytics
 
-    /// Erster Tag mit History-Eintrag. Tage davor zählen in Quoten nicht als verfehlt.
+    /// Erster Tag mit mindestens einem erledigten Ziel. Tage davor zählen in Quoten nicht als verfehlt.
+    /// Tage nur mit `false`-Werten (Altdaten/Importe) werden ignoriert.
     /// Gecacht (wird bei jeder History-Änderung invalidiert), da die Analytics es sehr oft abfragen.
     /// `yyyy-MM-dd`-Keys sortieren als String chronologisch → nur der kleinste gültige Key wird geparst.
     var firstTrackedDay: Date? {
         if let cached = _firstTrackedDayCache { return cached }
-        let first = history.keys.sorted().lazy.compactMap { Self.dateFormatter.date(from: $0) }.first
+        let currentHistory = history
+        let first = currentHistory.keys.sorted().lazy
+            .filter { currentHistory[$0]?.values.contains(true) == true }
+            .compactMap { Self.dateFormatter.date(from: $0) }
+            .first
         _firstTrackedDayCache = .some(first)
         return first
     }

@@ -30,6 +30,12 @@ struct GoalRowView: View {
             )
         }
         .buttonStyle(.plain)
+        // VoiceOver: Name + Status statt der Symbolnamen („Buch“, „Kreis“)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(goal.name)
+        .accessibilityValue(isCompleted ? "Erledigt" : "Offen")
+        .accessibilityHint("Doppeltippen zum Umschalten")
+        .accessibilityAddTraits(.isButton)
     }
 
     private var toggleIcon: some View {
