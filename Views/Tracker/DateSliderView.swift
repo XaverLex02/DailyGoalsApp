@@ -15,13 +15,19 @@ struct DateSliderView: View {
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 8) {
                     ForEach(dates, id: \.self) { date in
-                        DateCardView(date: date, isSelected: Calendar.current.isDate(date, inSameDayAs: selectedDate))
-                            .id(date)
-                            .onTapGesture {
-                                withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
-                                    selectedDate = date
-                                }
+                        let isSelected = Calendar.current.isDate(date, inSameDayAs: selectedDate)
+                        // Echter Button statt onTapGesture, damit VoiceOver die Karte als bedienbar erkennt
+                        Button {
+                            withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                                selectedDate = date
                             }
+                        } label: {
+                            DateCardView(date: date, isSelected: isSelected)
+                        }
+                        .buttonStyle(.plain)
+                        .id(date)
+                        .accessibilityLabel(DateCardView.accessibilityLabel(for: date, today: today))
+                        .accessibilityAddTraits(isSelected ? .isSelected : [])
                     }
                 }
                 .padding(.horizontal, 16)
@@ -53,6 +59,19 @@ private struct DateCardView: View {
         f.locale = Locale(identifier: "de_DE")
         return f
     }()
+
+    private static let fullDateFormatter: DateFormatter = {
+        let f = DateFormatter()
+        f.dateFormat = "EEEE, d. MMMM"
+        f.locale = Locale(identifier: "de_DE")
+        return f
+    }()
+
+    /// z. B. „Heute, Montag, 9. November“
+    static func accessibilityLabel(for date: Date, today: Date) -> String {
+        let text = fullDateFormatter.string(from: date)
+        return Calendar.current.isDate(date, inSameDayAs: today) ? "Heute, \(text)" : text
+    }
 
     private static let dayFormatter: DateFormatter = {
         let f = DateFormatter()

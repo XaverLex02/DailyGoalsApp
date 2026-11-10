@@ -33,6 +33,12 @@ struct AnalyticsSnapshot: Equatable {
         let goalRates: [UUID: Double]
         /// Durchschnitt über alle Ziele
         let overallRate: Double
+        /// Gezählte Tage in diesem Abschnitt
+        let days: Int
+        /// Tage, die der Abschnitt vollständig hätte (7 bei Wochen, 28–31 bei Monaten, …)
+        let fullDays: Int
+        /// Abschnitt enthält heute und ist noch nicht abgeschlossen → Werte noch wenig aussagekräftig
+        let isRunning: Bool
         var id: Date { start }
     }
 
@@ -151,16 +157,22 @@ extension GoalsStore {
         }
 
         let goalCount = max(currentGoals.count, 1)
+        let todayBucket = Self.bucketStart(for: today, granularity: granularity, calendar: cal)
 
         let buckets: [AnalyticsSnapshot.Bucket] = bucketOrder.map { b in
-            let days = Double(bucketDays[b] ?? 1)
+            let fullDays = Self.bucketLength(from: b, granularity: granularity, calendar: cal)
+            let lastDay = cal.date(byAdding: .day, value: fullDays - 1, to: b) ?? b
+            let isRunning = granularity != .day && b == todayBucket && today < lastDay
+            let dayCountInBucket = bucketDays[b] ?? 1
+            let days = Double(dayCountInBucket)
             let doneCounts = bucketDone[b] ?? []
             var rates: [UUID: Double] = [:]
             for (i, goal) in currentGoals.enumerated() {
                 rates[goal.id] = Double(doneCounts[i]) / days
             }
             let overall = Double(doneCounts.reduce(0, +)) / (days * Double(goalCount))
-            return .init(start: b, goalRates: rates, overallRate: overall)
+            return .init(start: b, goalRates: rates, overallRate: overall,
+                         days: dayCountInBucket, fullDays: fullDays, isRunning: isRunning)
         }
 
         let overallRate = Double(totalDone) / (Double(dayCount) * Double(goalCount))
@@ -212,6 +224,19 @@ extension GoalsStore {
             previousOverallRate: previousRate, weekdayPoints: weekdayPoints,
             topPairs: Array(topPairs), streaks: streaks
         )
+    }
+
+    /// Anzahl Tage eines vollständigen Abschnitts ab `start`
+    static func bucketLength(from start: Date, granularity: AnalyticsGranularity, calendar cal: Calendar) -> Int {
+        let next: Date?
+        switch granularity {
+        case .day:     return 1
+        case .week:    next = cal.date(byAdding: .day, value: 7, to: start)
+        case .month:   next = cal.date(byAdding: .month, value: 1, to: start)
+        case .quarter: next = cal.date(byAdding: .month, value: 3, to: start)
+        }
+        guard let next else { return 1 }
+        return max(1, cal.dateComponents([.day], from: start, to: next).day ?? 1)
     }
 
     static func bucketStart(for day: Date, granularity: AnalyticsGranularity, calendar cal: Calendar) -> Date {

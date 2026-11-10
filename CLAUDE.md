@@ -12,7 +12,7 @@ Produktziele, an denen sich Änderungen messen lassen sollten:
 2. **Nachtragen** – die letzten 30 Tage plus heute sind über den Datums-Slider editierbar; Zukunft ist bewusst nicht auswählbar.
 3. **Motivation durch Streaks** – Gesamt-Streak (alle Ziele erfüllt) in der Toolbar, Einzel-Streaks pro Ziel in der Analyse. Ein noch nicht erfüllter heutiger Tag bricht die Streak nicht (Zählung beginnt dann bei gestern).
 4. **Rückblick / Muster erkennen** – Monatsquoten, Wochentags-Verteilung, häufigste Zielkombinationen, 6-Monats-Matrix.
-5. **Erinnern** – optionale tägliche lokale Benachrichtigung zu einer festen Uhrzeit.
+5. **Erinnern** – optionale tägliche lokale Benachrichtigung zu einer festen Uhrzeit, die die noch offenen Ziele nennt und entfällt, wenn alles erledigt ist.
 6. **Datenhoheit ohne Backend** – alles lokal in UserDefaults; Backup/Umzug nur per JSON über die Zwischenablage. Kein iCloud, kein Server, keine Accounts.
 
 ## Build & Run
@@ -41,13 +41,14 @@ Hinweise:
 `GoalsStore` (`Views/Tracker/GoalsStore.swift`, liegt trotz Model-Charakter im Views-Ordner) ist die einzige Datenquelle für Ziele und History – eine `@MainActor`-Klasse (`ObservableObject`), die als `@StateObject` in `DailyGoalsApp` erstellt und per `.environmentObject()` weitergegeben wird.
 
 - **Persistenz:** `@AppStorage("goalsHistory")` und `@AppStorage("goals")` speichern JSON-`Data` in UserDefaults. `@AppStorage` außerhalb von Views löst kein Update aus → jeder Setter ruft manuell `objectWillChange.send()`.
-- **History-Format:** `[String: [String: Bool]]` — äußerer Key Datum (`yyyy-MM-dd`), innerer Key `goal.id.uuidString`, Wert Abschluss-Status. Fehlender Eintrag = nicht erledigt.
+- **History-Format:** `[String: [String: Bool]]` — äußerer Key Datum (`yyyy-MM-dd`), innerer Key `goal.id.uuidString`. `toggle` speichert **nur `true`**: Abhaken entfernt den Eintrag, leere Tage werden ganz entfernt. Fehlender Eintrag = nicht erledigt. `false`-Werte können nur noch aus Altdaten/Importen stammen.
 - **Goals-Format:** `[Goal]` — max. 5, min. 1 Ziel (in `addGoal`/`removeGoal` erzwungen, UI blendet Buttons entsprechend aus).
 - `history` und `goals` werden in `_historyCache` / `_goalsCache` gecacht; Schreiben nur über die Setter (aktualisieren Cache + UserDefaults). `goals` fällt bei Dekodierfehler still auf `Goal.defaults` zurück.
-- `removeGoal` löscht auch alle History-Einträge des Ziels unwiderruflich.
+- `removeGoal` löscht auch alle History-Einträge des Ziels unwiderruflich (leere Tage fallen weg). `moveGoals(from:to:)` ändert die Reihenfolge (wirkt auf Tracker, Analyse und Erinnerungstext).
 - **Migration:** `migrateIfNeeded()` (im `init`) läuft nur, wenn `goals` leer/undekodierbar ist. Die eigentliche Key-Umschreibung (`GoalType.rawValue` → feste UUIDs via `Goal.migrationMap`) steckt in `GoalsStore.migrateLegacyKeys(_:)` und wird auch beim Import genutzt.
 - **Import/Export:** Export-Format ist `GoalsStore.Backup` = `{"goals": [Goal], "history": {...}}` (pretty-printed, sortierte Keys). `importJSON` akzeptiert dieses Format (ersetzt Ziele **und** History) oder das alte reine History-Dictionary (ersetzt nur History, migriert Legacy-Keys). Validiert: Datums-Keys müssen `yyyy-MM-dd` sein, 1–5 Ziele.
-- **Statistik-Basis:** Quoten zählen jeden Kalendertag ab `firstTrackedDay` (frühester History-Eintrag, gecacht) bis heute; fehlender Eintrag = nicht erledigt.
+- **Statistik-Basis:** Quoten zählen jeden Kalendertag ab `firstTrackedDay` (frühester Tag mit mindestens einem `true`, gecacht) bis heute; fehlender Eintrag = nicht erledigt.
+- **Erinnerungen:** `rescheduleReminders(settings:)` ist der einzige Einstieg zum Planen/Stornieren. Aufgerufen in `DailyGoalsApp` bei jeder Store-Änderung (`onReceive(objectWillChange)`) und wenn die App aktiv wird (`scenePhase`), außerdem bei Änderungen an Schalter/Uhrzeit in Einstellungen und Onboarding. Neue Aufrufer **nicht** direkt `NotificationManager.schedule` nutzen lassen.
 - **Analytics:** `analyticsSnapshot(range:)` liefert einen gecachten `AnalyticsSnapshot` (Cache wird in den Settern von `history`/`goals` und bei Tageswechsel geleert). Die Monatsmatrix nutzt separat `monthlyRate(for:month:)`.
 - **Performance – wichtig:** Nach dem ersten Öffnen bleibt `AnalyticsView` im `TabView` am Leben und ihr `body` läuft bei **jeder** Store-Änderung, also bei jedem Abhaken im Tracker. Deshalb:
   - `AnalyticsView` rechnet nur, solange sie sichtbar ist (`isVisible` via `onAppear`/`onDisappear`, Refresh per `onReceive(store.objectWillChange)`), und hält Ergebnisse in `@State`.
@@ -61,8 +62,8 @@ Hinweise:
 ### Datenmodelle
 
 - `Goal` (`Models/Goal.swift`): `Identifiable & Codable & Equatable`-Struct mit `id: UUID`, `name`, `colorHex` (`#RRGGBB`), `symbol` (SF Symbol), optional `description` (nur im Editor sichtbar, siehe `docs/superpowers/specs/2026-03-30-goal-description-design.md`). Fünf Standardziele in `Goal.defaults` mit fest codierten UUIDs (`A1B2C3D4-000N-…`) – **diese UUIDs nie ändern**, Migration hängt daran.
-- `AnalyticsSnapshot` (`Models/AnalyticsSnapshot.swift`): alle Analyse-Werte für einen `AnalyticsRange` (`days30`, `months3`, `months12`, `all`), in **einem** Durchlauf über die Tage berechnet (`GoalsStore.computeAnalyticsSnapshot`). Granularität: 30 Tage → Tag, 3 Monate → Woche (Mo-Start), 12 Monate → Monat, Gesamt → Monat bzw. Quartal ab > 24 Monaten. Enthält Buckets (Quote je Ziel + gesamt), Gesamtquote, Vorperioden-Quote (gleich lang, direkt davor; nicht bei „Gesamt“), Wochentage, Top-Paare und Streaks.
-- `NotificationManager` (`Models/NotificationManager.swift`): statische Helfer, eine wiederholende `UNCalendarNotificationTrigger`-Notification mit fester ID `dailyGoalsReminder`.
+- `AnalyticsSnapshot` (`Models/AnalyticsSnapshot.swift`): alle Analyse-Werte für einen `AnalyticsRange` (`days30`, `months3`, `months12`, `all`), in **einem** Durchlauf über die Tage berechnet (`GoalsStore.computeAnalyticsSnapshot`). Granularität: 30 Tage → Tag, 3 Monate → Woche (Mo-Start), 12 Monate → Monat, Gesamt → Monat bzw. Quartal ab > 24 Monaten. Enthält Buckets (Quote je Ziel + gesamt, gezählte/volle Tage, `isRunning` für den noch laufenden Abschnitt), Gesamtquote, Vorperioden-Quote (gleich lang, direkt davor; nicht bei „Gesamt“), Wochentage, Top-Paare und Streaks.
+- `NotificationManager` (`Models/NotificationManager.swift`): plant **einzelne, datierte** Benachrichtigungen für die nächsten 30 Tage (IDs `dailyGoalsReminder-yyyy-MM-dd`, kein wiederholender Trigger). Text „Noch offen: …“ (heute = offene Ziele, künftige Tage = alle Ziele). Ist heute alles erledigt, wird die heutige Erinnerung nicht geplant und eine bereits zugestellte entfernt. Beim Neuplanen wird auch die alte ID `dailyGoalsReminder` entfernt.
 
 ### App-Start & Views
 
@@ -93,6 +94,8 @@ ContentView (TabView)
 - **Haptik:** `UIImpactFeedbackGenerator(.medium)` in `GoalsStore.toggle()`.
 - `GoalsStore` → `ObservableObject` / `@EnvironmentObject`; `AppSettings` → `@Observable` / `@Environment(AppSettings.self)` (+ `@Bindable` für Bindings) — nicht verwechseln. Previews müssen beide injizieren, wenn die View sie nutzt.
 - Alle Views haben `#Preview`-Makros.
+- **Charts:** Serien und Farben immer über `goal.id` zuordnen, nie über `goal.name` (Namen dürfen doppelt vorkommen). Linien-Charts nutzen `SeriesPoint` (`AnalyticsView.swift`): Der laufende Abschnitt ist eine eigene, gestrichelte Serie, mit Hinweis `RunningBucketNote`.
+- **Barrierefreiheit:** Tippbare Elemente sind `Button`s (kein `onTapGesture`). Zustände werden per `accessibilityValue`/`.isSelected` angesagt (siehe `GoalRowView`, `DateSliderView`).
 - Keine `#available`-Fallbacks nötig: Deployment Target ist 26.2.
 
 ## Bekannte Einschränkungen
@@ -103,5 +106,6 @@ ContentView (TabView)
 - Löschen eines Ziels entfernt dessen History unwiderruflich (Hinweis steht im Footer der Ziel-Sektion, keine Rückfrage).
 - History-Keys basieren auf der Gerätezeitzone; Reisen über Zeitzonen kann Einträge auf Nachbartage verschieben.
 - Der Wochentags-Chart stapelt die Quoten aller Ziele; die Y-Achse geht daher von 0 bis Anzahl Ziele.
-- Angebrochene Abschnitte am Rand (z. B. die laufende Woche mit erst 1 Tag) werden wie volle gewertet und können in Wochen-/Quartalscharts Ausreißer auf 0 % oder 100 % erzeugen.
+- Der **laufende** Abschnitt wird gestrichelt und blasser dargestellt. Ein angebrochener **erster** Abschnitt (Zeitraumbeginn mitten in der Woche) wird dagegen normal dargestellt.
+- Erinnerungen sind 30 Tage im Voraus geplant. Wird die App länger nicht geöffnet, enden sie danach.
 - Die Zeitmessungen oben stammen aus einer temporären Messsonde (Launch-Argumente, die automatisch abhaken und die Zeit loggen), die nicht im Code verbleibt. Für neue Messungen: synthetische History erzeugen und über `defaults`/Plist im Simulator einspielen (siehe Build & Run).
